@@ -44,6 +44,7 @@ class App extends Component {
     const contract = web3.eth.Contract(Wallet.abi, contractAddress)
     this.setState({ contract })
     //This is will just create a transaction with some metadata, but it won't be executed until a minimum approval limit is reached
+    //This would be called when you refresh the browser or go to the url
     await contract.methods.createTransfer("10000000000000000", to).send({ from: this.state.account})
     .once('receipt',  (receipt) => {
       console.log(receipt);
