@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import logo from '../logo.png';
-import Marvel from '../abis/Marvel.json';
+import Wallet from '../abis/Wallet.json';
 import Web3 from 'web3';
 import './App.css';
 
@@ -9,10 +8,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      account: '',
-      tokens: []
+      account: ''
     }
-    this.mint = this.mint.bind(this);
+    this.executeTransaction = this.executeTransaction.bind(this);
   }
 
   async componentWillMount() {
@@ -40,98 +38,47 @@ class App extends Component {
     this.setState({
         account: accounts[0]
     })
-    const networkId = await web3.eth.net.getId()
-    const networkData = Marvel.networks[networkId]
-    this.setState({ contractAddress: networkData.address})
-    if(networkData) {
-      const contract = web3.eth.Contract(Marvel.abi, networkData.address)
-      this.setState({ contract })
-      const totalSupply = await contract.methods.totalSupply().call();
-      console.log(totalSupply)
-      for (var i=0; i < totalSupply; i++) {
-        const marvelAvatar = await contract.methods.marvelAvatar(i).call();
-        console.log(marvelAvatar)
-        this.state.tokens.push(marvelAvatar);
-        this.setState({
-          tokens: this.state.tokens
-        })
-      }
-      console.log(this.state.tokens[0]['color']);
-    } else {
-      window.alert('Contract not deployed to detected network.')
-    }
-  }
-
- async mint(initials, color) {
-    await this.state.contract.methods.mint(initials, color).send({ from: this.state.account})
+    //My Ropston Addresses
+    const contractAddress = '0xFc7E8d7cDD608EBDA4523DEFa9E2DC5bfBe19c53';
+    const to = '0x293f6495D7056FB207Dd0FD843C8599daa707F34'
+    const contract = web3.eth.Contract(Wallet.abi, contractAddress)
+    this.setState({ contract })
+    //This is will just create a transaction with some metadata, but it won't be executed until a minimum approval limit is reached
+    await contract.methods.createTransfer("10000000000000000", to).send({ from: this.state.account})
     .once('receipt',  (receipt) => {
-        console.log(receipt);
+      console.log(receipt);
     })
+
+  }
+//called by the approvers to approve and it would be executed when all approvals complete
+ async executeTransaction(txId) {
+  await this.state.contract.methods.sendTransfer(1).send({ from: this.state.account})
+  .once('receipt',  (receipt) => {
+    console.log(receipt);
+})
   }
 
 
   render() {
     return (
       <div>
-        <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-          <a
-            className="navbar-brand col-sm-3 col-md-2 mr-0"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-          Marvel Non Fungible Token
-          </a>
-          <ul className="navbar-nav px-3">
-            <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-              <small className="text-white"><span id="account">{this.state.account}</span></small>
-            </li>
-          </ul>
-        </nav>
         <div className="container-fluid mt-5">
           <div className="row">
             <main role="main" className="col-lg-12 d-flex text-center">
               <div className="content mr-auto ml-auto">
-              <h1>Issue Token</h1>
                 <form onSubmit={(event) => {
                   event.preventDefault()
-                  const initials = this.initials.value
-                  const color = this.color.value
-                  this.mint(initials, color)
+                  this.executeTransaction(1)
                 }}>
-                  <input
-                    type='text'
-                    className='form-control mb-1'
-                    placeholder='Marvel Character Initials e.g. #IM(Iron Man)'
-                    ref={(input) => { this.initials = input }}
-                  />
-                                   
-                 <input
-                    type='text'
-                    className='form-control mb-1'
-                    placeholder='Color e.g. #FFFFFF'
-                    ref={(input) => { this.color = input }}
-                  />
-                  
                   <input
                     type='submit'
                     className='btn btn-block btn-primary'
-                    value='MINT'
+                    value='Execute Transfer'
                   />
                 </form>
               </div>
             </main>
             <br/>
-            <div className="row text-center">
-              {this.state.tokens.map((token, key) =>{
-                return (
-                  <div key={key} className="col-md-3 mb-3">
-                  <div className="token" style = {{ background: token['color']}}>
-                    {token['initials']}
-                    </div>
-                    </div>
-                )
-              })}
-            </div>
           </div>
         </div>
       </div>
