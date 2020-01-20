@@ -70,6 +70,7 @@ class App extends Component {
 
     //This is will just create a transaction with some metadata, but it won't be executed until a minimum approval limit is reached
     //This would be called when you refresh the browser or go to the url
+    //destination contract address is a Sample Contract used for now you can find it in the contract folder.
     await contract.methods.submitTransaction("0xdb5f3aff7df77ef5e5353f5ccf725e911eb37442", 0, data).send({ from: this.state.account})
     .once('receipt',  (receipt) => {
       console.log(receipt);
