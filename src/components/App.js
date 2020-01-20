@@ -39,49 +39,51 @@ class App extends Component {
         account: accounts[0]
     })
     //My Ropston Addresses
-    const contractAddress = '0xFc7E8d7cDD608EBDA4523DEFa9E2DC5bfBe19c53';
-    const to = '0x293f6495D7056FB207Dd0FD843C8599daa707F34'
+    const contractAddress = '0xaf2019bd11fce1ba40cf15eb0e6a6fbb90b0f1b6';
     const contract = web3.eth.Contract(Wallet.abi, contractAddress)
     this.setState({ contract })
+    const abi = {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_i",
+            "type": "uint256"
+          }
+        ],
+        "name": "uint2str",
+        "outputs": [
+          {
+            "name": "_uintAsString",
+            "type": "string"
+          }
+        ],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      }
+    
+    const args = [
+      "100"
+    ]
+    var data = await web3.eth.abi.encodeFunctionCall(abi, args)
+    console.log(data)
+
     //This is will just create a transaction with some metadata, but it won't be executed until a minimum approval limit is reached
     //This would be called when you refresh the browser or go to the url
-    await contract.methods.createTransfer("10000000000000000", to).send({ from: this.state.account})
+    await contract.methods.submitTransaction("0xdb5f3aff7df77ef5e5353f5ccf725e911eb37442", 0, data).send({ from: this.state.account})
     .once('receipt',  (receipt) => {
       console.log(receipt);
     })
 
   }
 //called by the approvers to approve and it would be executed when all approvals complete
- async executeTransaction(txId) {
-  await this.state.contract.methods.sendTransfer(1).send({ from: this.state.account})
-  .once('receipt',  (receipt) => {
-    console.log(receipt);
-})
-  }
+
 
 
   render() {
     return (
       <div>
-        <div className="container-fluid mt-5">
-          <div className="row">
-            <main role="main" className="col-lg-12 d-flex text-center">
-              <div className="content mr-auto ml-auto">
-                <form onSubmit={(event) => {
-                  event.preventDefault()
-                  this.executeTransaction(1)
-                }}>
-                  <input
-                    type='submit'
-                    className='btn btn-block btn-primary'
-                    value='Execute Transfer'
-                  />
-                </form>
-              </div>
-            </main>
-            <br/>
-          </div>
-        </div>
+       Multi Sig Wallet
       </div>
     );
   }
