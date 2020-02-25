@@ -10,7 +10,6 @@ class App extends Component {
     this.state = {
       account: ''
     }
-    this.executeTransaction = this.executeTransaction.bind(this);
   }
 
   async componentWillMount() {
@@ -42,6 +41,8 @@ class App extends Component {
     const contractAddress = '0xaf2019bd11fce1ba40cf15eb0e6a6fbb90b0f1b6';
     const contract = web3.eth.Contract(Wallet.abi, contractAddress)
     this.setState({ contract })
+    
+    //By calling the submit transaction method in the multisig contract, we nned to pass encoded function data of any function of this contract or any other contract you wanna execute, so just using this function for simplicity for now.
     const abi = {
         "constant": false,
         "inputs": [
@@ -77,9 +78,6 @@ class App extends Component {
     })
 
   }
-//called by the approvers to approve and it would be executed when all approvals complete
-
-
 
   render() {
     return (
